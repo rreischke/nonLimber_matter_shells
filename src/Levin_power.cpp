@@ -319,6 +319,11 @@ double Levin_power::kernels(double chi, uint i_tomo)
     }
 }
 
+double Levin_power::super_gaussian(double x, double x0, double s, uint i_tomo)
+{
+    return norm_srd.at(i_tomo) * exp(-pow((x - x0) / (2.0 * s), n_super));
+}
+
 double Levin_power::chi_of_z(double z)
 {
     return gsl_spline_eval(spline_chi_of_z, z, acc_chi_of_z);
