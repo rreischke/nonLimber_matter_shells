@@ -1,8 +1,10 @@
+from cProfile import label
 import levinpower
 
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from scipy.interpolate import UnivariateSpline
 
 
 if __name__ == "__main__":
@@ -15,18 +17,40 @@ if __name__ == "__main__":
     k_pk = pk["k"]
     z_pk = pk["z"]
     power_spectrum = pk["pk_nl"].flatten()
-    number_count = kernels["kernels_cl"].shape[0]
     backgound_z = background["z"]
     background_chi = background["chi"]
     chi_kernels = kernels["chi_cl"]
+
+# Prepare redshift distribution input
+    z_edges = np.loadtxt("./../data/zlim.txt")
+    z_of_chi = UnivariateSpline(background_chi, backgound_z, s=0, ext=1)
+    dz_dchi = z_of_chi.derivative()
+    nbins = len(z_edges) - 1
+    new_kernel = np.zeros((nbins, len(chi_kernels)))
+    for i in range(nbins):
+        for j in range(len(chi_kernels)):
+            if(z_of_chi(chi_kernels[j]) > z_edges[i] and z_of_chi(chi_kernels[j]) < z_edges[i+1]):
+                new_kernel[i, j] = dz_dchi(chi_kernels[j])
+
+    number_count = new_kernel.shape[0]
     kernels = np.concatenate(
-        (kernels["kernels_cl"].T, kernels["kernels_sh"].T), axis=1)
+        (new_kernel.T, kernels["kernels_sh"].T), axis=1)
+
 
 # Setup the class with precomputed bessel functions (take a few moments)
-    lp = levinpower.LevinPower(True, number_count,
-                          backgound_z, background_chi,
-                          chi_kernels, kernels,
-                          k_pk, z_pk, power_spectrum)
+    lp = levinpower.LevinPower(False, number_count,
+                               backgound_z, background_chi,
+                               chi_kernels, kernels,
+                               k_pk, z_pk, power_spectrum, True)
+
+    inter = np.zeros_like(chi_kernels)
+    for i in range(nbins):
+        for j in range(len(chi_kernels)):
+            inter[j] = lp.dlnkernels_dlnchi(chi_kernels[j],i)  
+        #plt.plot(chi_kernels,new_kernel[i,:])
+        plt.plot(chi_kernels,np.abs(inter))
+    plt.yscale('log')
+    plt.show()
 
     ell = np.arange(2, 4000, 1)
     t0 = time.time()
@@ -37,14 +61,20 @@ if __name__ == "__main__":
     t1 = time.time()
     total = t1-t0
     print(total)
- 
- 
+
     plt.plot(ell, Cl_gg[0])
+    plt.plot(ell, Cl_gg[nbins])
+    plt.plot(ell, Cl_gg[nbins + nbins - 1])
+    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
+    plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
+    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
+    
     # updating the kernls, spectrum, background (is the same here, but could change)
-    lp.init_splines(backgound_z, background_chi,
-                    chi_kernels, kernels, k_pk, z_pk, power_spectrum)
-    Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
-    plt.plot(ell, Cl_gg[0], "--")
+    # lp.init_splines(backgound_z, background_chi,
+    #                chi_kernels, kernels, k_pk, z_pk, power_spectrum)
+    #Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
+    #plt.plot(ell, Cl_gg[0], "--")
     plt.xscale('log')
     plt.yscale('log')
     plt.show()
+

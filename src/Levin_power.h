@@ -44,11 +44,11 @@ private:
   static const double tol_rel;
   static const double limber_tolerance;
   static const double min_sv;
-  static const uint N_interp = 500;
+  static const uint N_interp = 300;
   const double eLimber_rel = 1e-5;
-  const uint ellmax_non_limber = 300;
-  const uint maximum_number_subintervals = 10;
-  const uint ell_limber = 300;
+  const uint ellmax_non_limber = 95;
+  const uint maximum_number_subintervals = 12;
+  const uint ell_limber = 1000;
   const uint min_ell = 10;
   const uint max_ell = 30000;
   const uint N_linear_ell = 20;

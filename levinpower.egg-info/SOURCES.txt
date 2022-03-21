@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+setup.py
+levinpower.egg-info/PKG-INFO
+levinpower.egg-info/SOURCES.txt
+levinpower.egg-info/dependency_links.txt
+levinpower.egg-info/not-zip-safe
+levinpower.egg-info/requires.txt
+levinpower.egg-info/top_level.txt
+python/pybind11_interface.cpp
+src/Levin_power.cpp

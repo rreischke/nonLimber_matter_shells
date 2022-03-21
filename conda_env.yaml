@@ -1,0 +1,12 @@
+name: levin_max
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3
+  - future
+  - pyyaml
+  - numpy
+  - pyccl
+  - pip>=20.0
+  - gsl
