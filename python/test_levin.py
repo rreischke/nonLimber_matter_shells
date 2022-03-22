@@ -52,7 +52,7 @@ if __name__ == "__main__":
     plt.yscale('log')
     plt.show()
 
-    ell = np.arange(2, 30002, 1)
+    ell = np.arange(2, 3000, 1)
     t0 = time.time()
     # actually calculate the Cls, returns a list for galaxy clustering, ggl and cosmic shear
     # Each one is again a list of n_tomo_tracer_A (n_tomo_tracer_B+1)/2 entries with the length
@@ -62,12 +62,12 @@ if __name__ == "__main__":
     total = t1-t0
     print(total)
 
-    plt.plot(ell, Cl_gg[0])
-    plt.plot(ell, Cl_gg[nbins])
-    plt.plot(ell, Cl_gg[nbins + nbins - 1])
-    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
+    #plt.plot(ell, Cl_gg[0])
+    #plt.plot(ell, Cl_gg[nbins])
+    #plt.plot(ell, Cl_gg[nbins + nbins - 1])
+    #plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
     plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
-    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
+    #plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
     
     # updating the kernls, spectrum, background (is the same here, but could change)
     # lp.init_splines(backgound_z, background_chi,
