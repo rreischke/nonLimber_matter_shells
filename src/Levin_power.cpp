@@ -268,7 +268,7 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
         }
         if (!bessel_set)
         {
-            if(boxy && i_tomo << number_counts)
+            if(boxy && i_tomo < number_counts)
             {
                 kernel_maximum.push_back(chi0_srd.at(i_tomo));
             }
