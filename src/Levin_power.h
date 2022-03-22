@@ -47,7 +47,7 @@ private:
   static const uint N_interp = 300;
   const double eLimber_rel = 1e-5;
   const uint ellmax_non_limber = 95;
-  const uint maximum_number_subintervals = 12;
+  const uint maximum_number_subintervals = 20;
   const uint ell_limber = 1000;
   const uint min_ell = 10;
   const uint max_ell = 30000;

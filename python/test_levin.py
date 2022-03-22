@@ -62,12 +62,12 @@ if __name__ == "__main__":
     total = t1-t0
     print(total)
 
-    #plt.plot(ell, Cl_gg[0])
-    #plt.plot(ell, Cl_gg[nbins])
-    #plt.plot(ell, Cl_gg[nbins + nbins - 1])
-    #plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
+    plt.plot(ell, Cl_gg[0])
+    plt.plot(ell, Cl_gg[nbins])
+    plt.plot(ell, Cl_gg[nbins + nbins - 1])
+    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
     plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
-    #plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
+    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
     
     # updating the kernls, spectrum, background (is the same here, but could change)
     # lp.init_splines(backgound_z, background_chi,
