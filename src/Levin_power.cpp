@@ -249,7 +249,7 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
             {
                 width = xmax - xmin;
                 s_srd.at(i_tomo) = width / 2.0;
-                chi0_srd.at(i_tomo) = xmin + width / 2.0;
+                chi0_srd.at(i_tomo) = xmin + s_srd.at(i_tomo);
                 init_weight.at(i) = gsl_spline_eval_deriv(spline_z_of_chi, chi_cl.at(i), acc_z_of_chi) * super_gaussian(chi_cl.at(i), chi0_srd.at(i_tomo), s_srd.at(i_tomo), i_tomo);
             }
         }
@@ -268,7 +268,14 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
         }
         if (!bessel_set)
         {
-            kernel_maximum.push_back(chi_cl.at(find_kernel_maximum(init_weight)));
+            if(boxy && i_tomo << number_counts)
+            {
+                kernel_maximum.push_back(chi0_srd.at(i_tomo));
+            }
+            else
+            {
+                kernel_maximum.push_back(chi_cl.at(find_kernel_maximum(init_weight)));
+            }
         }
         gsl_spline_init(spline_Weight.at(i_tomo), &chi_cl[0], &init_weight[0], chi_cl.size());
     }
@@ -790,9 +797,10 @@ double Levin_power::d3P_d3k(double k, double z)
 
 double Levin_power::dlnkernels_dlnchi(double chi, uint i_tomo)
 {
-    if (boxy && i_tomo < number_counts)
+    if (boxy && i_tomo < number_counts && chi > (chi0_srd.at(i_tomo) - s_srd.at(i_tomo)) && chi < (chi0_srd.at(i_tomo) + s_srd.at(i_tomo)))
     {
-        return (n_super * pow((-chi0_srd.at(i_tomo) + chi) / s_srd.at(i_tomo), n_super) / (-chi0_srd.at(i_tomo) - chi) + gsl_spline_eval_deriv2(spline_z_of_chi, chi, acc_z_of_chi) / gsl_spline_eval_deriv(spline_z_of_chi, chi, acc_z_of_chi)) * chi;
+        //return (n_super * pow((-chi0_srd.at(i_tomo) + chi) / s_srd.at(i_tomo), n_super) / (-chi0_srd.at(i_tomo) - chi) + gsl_spline_eval_deriv2(spline_z_of_chi, chi, acc_z_of_chi) / gsl_spline_eval_deriv(spline_z_of_chi, chi, acc_z_of_chi)) * chi;
+        return 2.0;
     }
     else
     {
@@ -856,7 +864,7 @@ std::vector<double> Levin_power::all_C_ell(std::vector<uint> ell)
     {
         set_auxillary_splines(aux_ell.at(l));
         double factor1 = factor[aux_ell.at(l)];
-        //#pragma omp parallel for
+#pragma omp parallel for
         for (uint i_tomo = 0; i_tomo < n_total; i_tomo++)
         {
             for (uint j_tomo = i_tomo; j_tomo < n_total; j_tomo++)

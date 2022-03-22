@@ -52,7 +52,7 @@ if __name__ == "__main__":
     plt.yscale('log')
     plt.show()
 
-    ell = np.arange(2, 4000, 1)
+    ell = np.arange(2, 30002, 1)
     t0 = time.time()
     # actually calculate the Cls, returns a list for galaxy clustering, ggl and cosmic shear
     # Each one is again a list of n_tomo_tracer_A (n_tomo_tracer_B+1)/2 entries with the length
