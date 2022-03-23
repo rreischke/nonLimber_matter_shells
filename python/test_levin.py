@@ -60,6 +60,16 @@ if __name__ == "__main__":
     plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
     plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
     plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
+
+    lp.set_parameters(1000,100,20,10,30000,20,100,200)
+    Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
+    plt.plot(ell, Cl_gg[0], ls ="--")
+    plt.plot(ell, Cl_gg[nbins], ls ="--")
+    plt.plot(ell, Cl_gg[nbins + nbins - 1], ls ="--")
+    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1], ls ="--")
+    plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1], ls ="--")
+    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1], ls ="--")
+    
     
     # updating the kernls, spectrum, background (is the same here, but could change)
     # lp.init_splines(backgound_z, background_chi,

@@ -94,6 +94,9 @@ void Levin_power::init_Bessel()
 {
     if (!bessel_set)
     {
+        k_min_bessel.clear();
+        k_max_bessel.clear();
+        k_bessel.clear();
         for (uint i_tomo = 0; i_tomo < n_total; i_tomo++)
         {
             k_min_bessel.push_back(std::vector<double>());
@@ -125,6 +128,7 @@ void Levin_power::init_Bessel()
         }
         chi_size = static_cast<uint>(pow(2.0, maximum_number_subintervals + 1.0) + 1);
         std::vector<double> index_chi(chi_size);
+        chi_nodes.clear();
         for (uint i_chi = 0; i_chi < chi_size; i_chi++)
         {
             chi_nodes.push_back(chi_min + (chi_max - chi_min) / (chi_size - 1.0) * i_chi);
@@ -133,6 +137,8 @@ void Levin_power::init_Bessel()
         gsl_set_error_handler_off();
         if (precompute)
         {
+            A_ell_bessel.clear();
+            A_ellm1_bessel.clear();
             for (uint i_tomo = 0; i_tomo < n_total; i_tomo++)
             {
                 A_ell_bessel.push_back(std::vector<std::vector<double>>());
@@ -156,16 +162,22 @@ void Levin_power::init_Bessel()
                 }
             }
         }
+        aux_kmax.clear();
+        aux_kmin.clear();
         for (uint i_tomo = 0; i_tomo < n_total; i_tomo++)
         {
             aux_kmax.push_back(0.0);
             aux_kmin.push_back(0.0);
         }
+        spline_aux_kernel.clear();
+        acc_aux_kernel.clear();
         for (uint i = 0; i < n_total; i++)
         {
             spline_aux_kernel.push_back(gsl_spline_alloc(gsl_interp_steffen, N_interp));
             acc_aux_kernel.push_back(gsl_interp_accel_alloc());
         }
+        factor.clear();
+        ell_eLimber.clear();
         factor.push_back(1.0);
         for (uint i = 1; i < max_ell + 1; i++)
         {
