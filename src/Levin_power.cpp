@@ -65,6 +65,31 @@ Levin_power::~Levin_power()
     }
 }
 
+void Levin_power::set_parameters(uint ELL_limber, uint ELL_nonlimber, uint max_number_subintervals, uint minell, uint maxell, uint N_nonlimber, uint N_limber, uint Ninterp)
+{
+    ell_limber = ELL_limber;
+    ellmax_non_limber = ELL_nonlimber;
+    maximum_number_subintervals = max_number_subintervals;
+    min_ell = minell;
+    max_ell = maxell;
+    N_linear_ell = N_nonlimber;
+    N_log_ell = N_limber;
+    bessel_set = false;
+    N_interp = Ninterp;
+    aux_ell.clear();
+    for (uint i_ell = 0; i_ell < N_linear_ell; i_ell++)
+    {
+        uint ell = static_cast<uint>(exp(log(min_ell) + (log(ellmax_non_limber) - log(min_ell)) / (N_linear_ell - 1) * i_ell));
+        aux_ell.push_back(ell);
+    }
+    for (uint i_ell = 1; i_ell < N_log_ell; i_ell++)
+    {
+        uint ell = static_cast<uint>(exp(log(ellmax_non_limber) + (log(max_ell) - log(ellmax_non_limber)) / (N_log_ell - 1) * i_ell));
+        aux_ell.push_back(ell);
+    }
+    init_Bessel();
+}
+
 void Levin_power::init_Bessel()
 {
     if (!bessel_set)
@@ -187,7 +212,7 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
     {
         for (uint i_ell = 0; i_ell < N_linear_ell; i_ell++)
         {
-            uint ell = static_cast<uint>(min_ell + (ellmax_non_limber - min_ell) / (N_linear_ell - 1) * i_ell);
+            uint ell = static_cast<uint>(exp(log(min_ell) + (log(ellmax_non_limber) - log(min_ell)) / (N_linear_ell - 1) * i_ell));
             aux_ell.push_back(ell);
         }
         for (uint i_ell = 1; i_ell < N_log_ell; i_ell++)
@@ -808,7 +833,7 @@ double Levin_power::dlnkernels_dlnchi(double chi, uint i_tomo)
     {
         if (chi > (chi0_srd.at(i_tomo) - s_srd.at(i_tomo)) && chi < (chi0_srd.at(i_tomo) + s_srd.at(i_tomo)))
         {
-            return 2.0;
+            return (n_super * pow((-chi0_srd.at(i_tomo) + chi) / s_srd.at(i_tomo), n_super) / (-chi0_srd.at(i_tomo) - chi) + gsl_spline_eval_deriv2(spline_z_of_chi, chi, acc_z_of_chi) / gsl_spline_eval_deriv(spline_z_of_chi, chi, acc_z_of_chi)) * chi;
         }
         else
         {
@@ -843,19 +868,9 @@ double Levin_power::extended_Limber_kernel(double chi, void *p)
     double z = lp->z_of_chi(chi);
     double power = lp->power_nonlinear(z, k);
     double limber_part = weight_i_tomo * weight_j_tomo / chi * power;
-    // double dlnf_i = lp->dlnkernels_dlnchi(chi, lp->integration_variable_extended_Limber_i_tomo[tid]) - 0.5;
-    // double dlnf_j = lp->dlnkernels_dlnchi(chi, lp->integration_variable_extended_Limber_j_tomo[tid]) - 0.5;
-    double dlnf_i = 1.5;
-    double dlnf_j = 1.5;
+    double dlnf_i = lp->dlnkernels_dlnchi(chi, lp->integration_variable_extended_Limber_i_tomo[tid]) - 0.5;
+    double dlnf_j = lp->dlnkernels_dlnchi(chi, lp->integration_variable_extended_Limber_j_tomo[tid]) - 0.5;
     double correction = 0.5 / gsl_pow_2(lp->integration_variable_extended_Limber_ell[tid] + 0.5) * (dlnf_i * dlnf_j * lp->extended_limber_s(k, z) - lp->extended_limber_p(k, z));
-    /* if (lp->integration_variable_extended_Limber_i_tomo[tid] == 4 && lp->integration_variable_extended_Limber_j_tomo[tid] == 4)
-      {
-          std::cout << lp->integration_variable_extended_Limber_i_tomo[tid] << " " << lp->integration_variable_extended_Limber_ell[tid] <<  " " << correction << " " << dlnf_i << " " << lp->extended_limber_s(k, z) << " " << lp->extended_limber_p(k, z) << std::endl;
-      }
-      if (lp->integration_variable_extended_Limber_i_tomo[tid] == 3 && lp->integration_variable_extended_Limber_j_tomo[tid] == 3)
-      {
-          std::cout << lp->integration_variable_extended_Limber_i_tomo[tid] << " " << lp->integration_variable_extended_Limber_ell[tid] <<  " " << correction << " " << dlnf_i << " " << lp->extended_limber_s(k, z) << " " << lp->extended_limber_p(k, z) << std::endl;
-      }*/
     return limber_part * (1.0 + correction);
 }
 
@@ -867,10 +882,18 @@ double Levin_power::extended_Limber(uint ell, uint i_tomo, uint j_tomo)
     integration_variable_extended_Limber_j_tomo[tid] = j_tomo;
     double min = chi_min;
     double max = chi_max;
-    if (boxy && (i_tomo < number_counts || j_tomo < number_counts))
+    if (boxy && (i_tomo < number_counts && j_tomo < number_counts))
     {
-        min = chi0_srd.at(i_tomo) - s_srd.at(i_tomo);
-        max = chi0_srd.at(i_tomo) + s_srd.at(i_tomo);
+        if (i_tomo < j_tomo)
+        {
+            min = chi0_srd.at(i_tomo) - s_srd.at(i_tomo);
+            max = chi0_srd.at(j_tomo) + s_srd.at(j_tomo);
+        }
+        else
+        {
+            min = chi0_srd.at(j_tomo) - s_srd.at(j_tomo);
+            max = chi0_srd.at(i_tomo) + s_srd.at(i_tomo);
+        }
     }
     return gslIntegratecquad(extended_Limber_kernel, log(min), log(max));
 }

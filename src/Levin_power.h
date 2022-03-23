@@ -44,15 +44,15 @@ private:
   static const double tol_rel;
   static const double limber_tolerance;
   static const double min_sv;
-  static const uint N_interp = 300;
+  uint N_interp = 300;
   const double eLimber_rel = 1e-5;
-  const uint ellmax_non_limber = 95;
-  const uint maximum_number_subintervals = 20;
-  const uint ell_limber = 1000;
-  const uint min_ell = 10;
-  const uint max_ell = 30000;
-  const uint N_linear_ell = 20;
-  const uint N_log_ell = 100;
+  uint ellmax_non_limber = 95;
+  uint maximum_number_subintervals = 20;
+  uint ell_limber = 1000;
+  uint min_ell = 10;
+  uint max_ell = 30000;
+  uint N_linear_ell = 20;
+  uint N_log_ell = 100;
   std::vector<double> aux_ell;
   const uint N_thread_max = std::thread::hardware_concurrency();
 
@@ -127,6 +127,8 @@ public:
    * Destructor: clean up all allocated memory.
    */
   ~Levin_power();
+
+  void set_parameters(uint ELL_limber, uint ELL_nonlimber, uint max_number_subintervals, uint minell, uint maxell, uint N_nonlimber, uint N_limber, uint Ninterp);
 
   void init_Bessel();
 

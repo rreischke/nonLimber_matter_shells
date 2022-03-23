@@ -43,15 +43,7 @@ if __name__ == "__main__":
                                chi_kernels, kernels,
                                k_pk, z_pk, power_spectrum, True)
 
-    inter = np.zeros_like(chi_kernels)
-    for i in range(nbins):
-        for j in range(len(chi_kernels)):
-            inter[j] = lp.dlnkernels_dlnchi(chi_kernels[j],i)  
-        #plt.plot(chi_kernels,new_kernel[i,:])
-        plt.plot(chi_kernels,np.abs(inter))
-    plt.yscale('log')
-    plt.show()
-
+ 
     ell = np.arange(2, 3000, 1)
     t0 = time.time()
     # actually calculate the Cls, returns a list for galaxy clustering, ggl and cosmic shear

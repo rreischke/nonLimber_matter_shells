@@ -18,6 +18,18 @@ PYBIND11_MODULE(levinpower, m)
      py::class_<Levin_power>(m, "LevinPower")
          .def(py::init<bool, uint, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<std::vector<double>>, std::vector<double>, std::vector<double>, std::vector<double>, bool>(),
               "precompute1"_a, "number_count"_a, "z_bg"_a, "chi_bg"_a, "chi_cl"_a, "kernel"_a, "k_pk"_a, "z_pk"_a, "pk"_a, "boxy"_a) // Keyword arguments
+         .def("set_parameters", &Levin_power::set_parameters,
+              "ELL_limber"_a, "ELL_nonlimber"_a, "max_number_subintervals"_a, "minell"_a, "maxell"_a, "N_nonlimber"_a, "N_limber"_a, "Ninterp"_a,
+              py::call_guard<py::gil_scoped_release>(),
+              R"(sets the parameters used in the code. 
+              ELL_limber: from which ell onwards should Limber be used, 
+              ELL_nonlimber: up to which ell should nonlimber be used,
+              max_number_subintervals: maximum number of bisections,
+              minell: minimum multipole considered,
+              maxell: maximum multipole considered,
+              N_nonlimber: number of logarithmic interpolation points in the nonlimber range,
+              N_limber: number of logarithmic interpolation points in the limber range
+              Ninterp: number of interpolation points for k integration.)")
          .def("all_C_ell", &Levin_power::all_C_ell,
               "ell"_a,                                  // Keyword arguments
               py::call_guard<py::gil_scoped_release>(), // Should (?) release GIL
