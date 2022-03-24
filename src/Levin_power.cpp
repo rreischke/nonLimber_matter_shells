@@ -77,15 +77,44 @@ void Levin_power::set_parameters(uint ELL_limber, uint ELL_nonlimber, uint max_n
     bessel_set = false;
     N_interp = Ninterp;
     aux_ell.clear();
+    uint previous_ell = 0;
     for (uint i_ell = 0; i_ell < N_linear_ell; i_ell++)
     {
         uint ell = static_cast<uint>(exp(log(min_ell) + (log(ellmax_non_limber) - log(min_ell)) / (N_linear_ell - 1) * i_ell));
+        if (i_ell > 0)
+        {
+            if (previous_ell == ell)
+            {
+                ell += 1;
+            }
+        }
+        previous_ell = ell;
         aux_ell.push_back(ell);
     }
     for (uint i_ell = 1; i_ell < N_log_ell; i_ell++)
     {
         uint ell = static_cast<uint>(exp(log(ellmax_non_limber) + (log(max_ell) - log(ellmax_non_limber)) / (N_log_ell - 1) * i_ell));
+        if (i_ell > 1)
+        {
+            if (previous_ell == ell)
+            {
+                ell += 1;
+            }
+        }
+        previous_ell = ell;
         aux_ell.push_back(ell);
+    }
+    for (uint i = 0; i < n_total * n_total; i++)
+    {
+        gsl_spline_free(spline_result.at(i));
+        gsl_interp_accel_free(acc_result.at(i));
+    }
+    spline_result.clear();
+    acc_result.clear();
+    for (uint i = 0; i < n_total * n_total; i++)
+    {
+        spline_result.push_back(gsl_spline_alloc(gsl_interp_steffen, aux_ell.size()));
+        acc_result.push_back(gsl_interp_accel_alloc());
     }
     init_Bessel();
 }
@@ -222,14 +251,31 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
 {
     if (!bessel_set)
     {
+        uint previous_ell = 0;
         for (uint i_ell = 0; i_ell < N_linear_ell; i_ell++)
         {
             uint ell = static_cast<uint>(exp(log(min_ell) + (log(ellmax_non_limber) - log(min_ell)) / (N_linear_ell - 1) * i_ell));
+            if (i_ell > 0)
+            {
+                if (previous_ell == ell)
+                {
+                    ell += 1;
+                }
+            }
+            previous_ell = ell;
             aux_ell.push_back(ell);
         }
         for (uint i_ell = 1; i_ell < N_log_ell; i_ell++)
         {
             uint ell = static_cast<uint>(exp(log(ellmax_non_limber) + (log(max_ell) - log(ellmax_non_limber)) / (N_log_ell - 1) * i_ell));
+            if (i_ell > 1)
+            {
+                if (previous_ell == ell)
+                {
+                    ell += 1;
+                }
+            }
+            previous_ell = ell;
             aux_ell.push_back(ell);
         }
         for (uint i = 0; i < n_total * n_total; i++)
@@ -945,14 +991,15 @@ std::vector<double> Levin_power::all_C_ell(std::vector<uint> ell)
                 auto flat_idx = i_tomo * n_total + j_tomo;
                 if ((aux_ell.at(l) < ell_eLimber.at(i_tomo)))
                 {
-                    aux_result.at(flat_idx).at(l) = facaux * C_ell_full(i_tomo, j_tomo);
+                    aux_result.at(flat_idx).at(l) = facaux * C_ell_full(i_tomo, j_tomo) * aux_ell.at(l) * aux_ell.at(l);
                 }
                 else
                 {
-                    aux_result.at(flat_idx).at(l) = facaux * Limber(aux_ell.at(l), i_tomo, j_tomo);
+                    aux_result.at(flat_idx).at(l) = facaux * Limber(aux_ell.at(l), i_tomo, j_tomo) * aux_ell.at(l) * aux_ell.at(l);
                 }
             }
         }
+        aux_ell.at(l) = log(aux_ell.at(l));
     }
 #pragma omp parallel for
     for (uint i_tomo = 0; i_tomo < n_total; i_tomo++)
@@ -963,6 +1010,11 @@ std::vector<double> Levin_power::all_C_ell(std::vector<uint> ell)
             gsl_spline_init(spline_result.at(i_tomo * n_total + j_tomo), &aux_ell[0], &aux_result.at(flat_idx)[0], aux_ell.size());
         }
     }
+#pragma omp parallel for
+    for (uint l = 0; l < aux_ell.size(); l++)
+    {
+        aux_ell.at(l) = exp(aux_ell.at(l));
+    }
     for (uint l = 0; l < ell.size(); l++)
     {
 #pragma omp parallel for
@@ -971,7 +1023,7 @@ std::vector<double> Levin_power::all_C_ell(std::vector<uint> ell)
             for (uint j_tomo = i_tomo; j_tomo < n_total; j_tomo++)
             {
                 auto flat_idx = i_tomo * n_total + j_tomo;
-                result.at(l * n_total * n_total + flat_idx) = gsl_spline_eval(spline_result.at(flat_idx), ell.at(l), acc_result.at(flat_idx));
+                result.at(l * n_total * n_total + flat_idx) = gsl_spline_eval(spline_result.at(flat_idx), log(ell.at(l)), acc_result.at(flat_idx)) / ell.at(l) / ell.at(l);
             }
         }
     }

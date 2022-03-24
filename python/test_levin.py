@@ -32,9 +32,8 @@ if __name__ == "__main__":
             if(z_of_chi(chi_kernels[j]) > z_edges[i] and z_of_chi(chi_kernels[j]) < z_edges[i+1]):
                 new_kernel[i, j] = dz_dchi(chi_kernels[j])
 
-    number_count = new_kernel.shape[0]
-    kernels = np.concatenate(
-        (new_kernel.T, kernels["kernels_sh"].T), axis=1)
+    number_count = 1#new_kernel.shape[0]
+    kernels = new_kernel.T
 
 
 # Setup the class with precomputed bessel functions (take a few moments)
@@ -43,7 +42,8 @@ if __name__ == "__main__":
                                chi_kernels, kernels,
                                k_pk, z_pk, power_spectrum, True)
 
- 
+    lp.set_parameters(1000,100,20,10,30000,20,100,300)
+    
     ell = np.arange(2, 3000, 1)
     t0 = time.time()
     # actually calculate the Cls, returns a list for galaxy clustering, ggl and cosmic shear
@@ -53,24 +53,18 @@ if __name__ == "__main__":
     t1 = time.time()
     total = t1-t0
     print(total)
+    lp.set_parameters(1000,100,20,10,30000,30,100,300)
+    Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
+    
 
     plt.plot(ell, Cl_gg[0])
-    plt.plot(ell, Cl_gg[nbins])
+    '''plt.plot(ell, Cl_gg[nbins])
     plt.plot(ell, Cl_gg[nbins + nbins - 1])
     plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
     plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
     plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
 
-    lp.set_parameters(1000,100,20,10,30000,20,100,200)
-    Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
-    plt.plot(ell, Cl_gg[0], ls ="--")
-    plt.plot(ell, Cl_gg[nbins], ls ="--")
-    plt.plot(ell, Cl_gg[nbins + nbins - 1], ls ="--")
-    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1], ls ="--")
-    plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1], ls ="--")
-    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1], ls ="--")
-    
-    
+    '''
     # updating the kernls, spectrum, background (is the same here, but could change)
     # lp.init_splines(backgound_z, background_chi,
     #                chi_kernels, kernels, k_pk, z_pk, power_spectrum)
