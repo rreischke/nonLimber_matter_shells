@@ -47,5 +47,7 @@ n_total is the number of tomographic bins and i = i_tomo*n_total + j_tomo.)")
               py::call_guard<py::gil_scoped_release>())
          .def("compute_C_ells", &Levin_power::compute_C_ells,
               "ell"_a,                                  // Keyword arguments
-              py::call_guard<py::gil_scoped_release>()); // Should (?) release GIL;  // Doc string
+              py::call_guard<py::gil_scoped_release>()) // Should (?) release GIL;  // Doc string
+         .def("get_ells", &Levin_power::get_ells,
+               py::call_guard<py::gil_scoped_release>());
 }

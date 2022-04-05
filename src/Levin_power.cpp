@@ -1,7 +1,7 @@
 #include "Levin_power.h"
 #include <fstream>
 
-const double Levin_power::min_interval = 1.e-2;
+const double Levin_power::min_interval = 1.e-5;
 const double Levin_power::limber_tolerance = 1.0e-2;
 const double Levin_power::tol_abs = 1.0e-30;
 const double Levin_power::tol_rel = 1.0e-7;
@@ -83,26 +83,36 @@ void Levin_power::set_parameters(uint ELL_limber, uint ELL_nonlimber, uint max_n
         uint ell = static_cast<uint>(exp(log(min_ell) + (log(ellmax_non_limber) - log(min_ell)) / (N_linear_ell - 1) * i_ell));
         if (i_ell > 0)
         {
-            if (previous_ell == ell)
+            while (previous_ell >= ell)
             {
                 ell += 1;
             }
         }
         previous_ell = ell;
         aux_ell.push_back(ell);
+        if (ell == ellmax_non_limber)
+        {
+            N_linear_ell = i_ell;
+            break;
+        }
     }
     for (uint i_ell = 1; i_ell < N_log_ell; i_ell++)
     {
         uint ell = static_cast<uint>(exp(log(ellmax_non_limber) + (log(max_ell) - log(ellmax_non_limber)) / (N_log_ell - 1) * i_ell));
         if (i_ell > 1)
         {
-            if (previous_ell == ell)
+            while (previous_ell >= ell)
             {
                 ell += 1;
             }
         }
         previous_ell = ell;
         aux_ell.push_back(ell);
+        if (ell == max_ell)
+        {
+            N_log_ell = i_ell;
+            break;
+        }
     }
     for (uint i = 0; i < n_total * n_total; i++)
     {
@@ -139,7 +149,8 @@ void Levin_power::init_Bessel()
                 value_max = GSL_MIN(8.0 * (l + 0.5) / kernel_maximum.at(i_tomo), k_max);
                 if (l <= 5)
                 {
-                    value_max *= 3.0;
+                    value_max = k_min;
+                    value_min = k_max;
                 }
                 if (l >= 86)
                 {
@@ -333,7 +344,7 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
                 width = xmax - xmin;
                 s_srd.at(i_tomo) = width / 2.0;
                 chi0_srd.at(i_tomo) = xmin + s_srd.at(i_tomo);
-                //init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
+                // init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
                 if (chi_cl.at(i) >= xmin && chi_cl.at(i) <= xmax)
                 {
                     init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
@@ -814,6 +825,10 @@ void Levin_power::set_auxillary_splines(uint ell)
 
 double Levin_power::Limber(uint ell, uint i_tomo, uint j_tomo)
 {
+    if (i_tomo != j_tomo && i_tomo < number_counts && j_tomo < number_counts && boxy)
+    {
+        return 0.0;
+    }
     double fac = 1.0;
     if (i_tomo >= number_counts)
     {
@@ -1056,6 +1071,11 @@ uint Levin_power::getIndex(std::vector<double> v, double val)
 uint Levin_power::map_chi_index(double chi)
 {
     return static_cast<uint>((chi - chi_min) / (chi_max - chi_min) * (chi_size - 1.0));
+}
+
+std::vector<double> Levin_power::get_ells()
+{
+    return aux_ell;
 }
 
 std::tuple<result_Cl_type, result_Cl_type, result_Cl_type> Levin_power::compute_C_ells(std::vector<uint> ell)

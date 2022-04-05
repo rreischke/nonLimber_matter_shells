@@ -41,16 +41,18 @@ if __name__ == "__main__":
                                backgound_z, background_chi,
                                chi_kernels, kernels,
                                k_pk, z_pk, power_spectrum, True)
-    ELL_limber = 1000
-    ELL_nonlimber = 100
+    ELL_limber = 10000
+    ELL_nonlimber = 2900
     max_number_subintervals = 20
-    minell = 10
+    minell = 4
     maxell = 30000
-    N_nonlimber = 20
+    N_nonlimber = 40
     N_limber = 100
     Ninterp = 300
+    #print(lp.get_ells())
     lp.set_parameters(ELL_limber, ELL_nonlimber, max_number_subintervals,
                       minell, maxell, N_nonlimber, N_limber, Ninterp)
+    print(lp.get_ells())
 
     ell = np.arange(2, 3000, 1)
     t0 = time.time()
@@ -62,6 +64,7 @@ if __name__ == "__main__":
     total = t1-t0
     
     plt.plot(ell, Cl_gg[0])
+    plt.plot(ell, Cl_gg[1])
     #plt.plot(ell, Cl_gg[nbins])
     #plt.plot(ell, Cl_gg[nbins + nbins - 1])
     #plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
