@@ -32,7 +32,7 @@ if __name__ == "__main__":
             if(z_of_chi(chi_kernels[j]) > z_edges[i] and z_of_chi(chi_kernels[j]) < z_edges[i+1]):
                 new_kernel[i, j] = dz_dchi(chi_kernels[j])
 
-    number_count = 1#new_kernel.shape[0]
+    number_count = 2  # new_kernel.shape[0]
     kernels = new_kernel.T
 
 
@@ -41,9 +41,17 @@ if __name__ == "__main__":
                                backgound_z, background_chi,
                                chi_kernels, kernels,
                                k_pk, z_pk, power_spectrum, True)
+    ELL_limber = 1000
+    ELL_nonlimber = 100
+    max_number_subintervals = 20
+    minell = 10
+    maxell = 30000
+    N_nonlimber = 20
+    N_limber = 100
+    Ninterp = 300
+    lp.set_parameters(ELL_limber, ELL_nonlimber, max_number_subintervals,
+                      minell, maxell, N_nonlimber, N_limber, Ninterp)
 
-    lp.set_parameters(1000,100,20,10,30000,20,100,300)
-    
     ell = np.arange(2, 3000, 1)
     t0 = time.time()
     # actually calculate the Cls, returns a list for galaxy clustering, ggl and cosmic shear
@@ -52,18 +60,14 @@ if __name__ == "__main__":
     Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
     t1 = time.time()
     total = t1-t0
-    lp.set_parameters(1000,100,20,10,30000,30,100,300)
-    Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
     
-
     plt.plot(ell, Cl_gg[0])
-    '''plt.plot(ell, Cl_gg[nbins])
-    plt.plot(ell, Cl_gg[nbins + nbins - 1])
-    plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
-    plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
-    plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
+    #plt.plot(ell, Cl_gg[nbins])
+    #plt.plot(ell, Cl_gg[nbins + nbins - 1])
+    #plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
+    #plt.plot(ell, Cl_gg[4*nbins - 3 - 2 - 1])
+    #plt.plot(ell, Cl_gg[5*nbins -4  - 3 - 2 - 1])
 
-    '''
     # updating the kernls, spectrum, background (is the same here, but could change)
     # lp.init_splines(backgound_z, background_chi,
     #                chi_kernels, kernels, k_pk, z_pk, power_spectrum)
@@ -72,4 +76,3 @@ if __name__ == "__main__":
     plt.xscale('log')
     plt.yscale('log')
     plt.show()
-

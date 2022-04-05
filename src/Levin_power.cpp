@@ -333,7 +333,15 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
                 width = xmax - xmin;
                 s_srd.at(i_tomo) = width / 2.0;
                 chi0_srd.at(i_tomo) = xmin + s_srd.at(i_tomo);
-                init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i) * super_gaussian(chi_cl.at(i), chi0_srd.at(i_tomo), s_srd.at(i_tomo), i_tomo);
+                // init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i) * super_gaussian(chi_cl.at(i), chi0_srd.at(i_tomo), s_srd.at(i_tomo), i_tomo);
+                if (chi_cl.at(i) >= xmin && chi_cl.at(i) <= xmax)
+                {
+                    init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
+                }
+                else
+                {
+                    init_weight.at(i) = 0.0;
+                }
             }
         }
         if (boxy && i_tomo < number_counts)
