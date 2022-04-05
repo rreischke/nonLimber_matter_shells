@@ -320,6 +320,8 @@ public:
 
   uint map_chi_index(double chi);
 
+  std::vector<double> get_ells();
+
   /**
    * Returns the spectra for all tomographic bin combinations (i<j) for a list of multipoles. The final result is of the following shape:
    * (l * n_total * n_total + i), where l is the index of the ell list, n_total is the number of tomographic bins and i = i_tomo*n_total + j_tomo.

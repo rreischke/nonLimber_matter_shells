@@ -1149,3 +1149,8 @@ double Levin_power::gslIntegratecquad(double (*fc)(double, void *), double a, do
     gsl_integration_cquad_workspace_free(w);
     return y;
 }
+
+std::vector<double> Levin_power::get_ells()
+{
+    return aux_ell;
+}
