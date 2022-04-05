@@ -52,7 +52,6 @@ if __name__ == "__main__":
     Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
     t1 = time.time()
     total = t1-t0
-    print(total)
     lp.set_parameters(1000,100,20,10,30000,30,100,300)
     Cl_gg, Cl_gs, Cl_ss = lp.compute_C_ells(ell)
     

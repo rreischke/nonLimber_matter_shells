@@ -97,7 +97,7 @@ private:
   bool precompute;
 
   bool boxy = false;
-  uint n_super = 30;
+  uint n_super = 40;
   std::vector<double> chi0_srd, s_srd, norm_srd;
 
   uint *integration_variable_i_tomo, *integration_variable_j_tomo;

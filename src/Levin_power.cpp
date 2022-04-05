@@ -333,7 +333,7 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
                 width = xmax - xmin;
                 s_srd.at(i_tomo) = width / 2.0;
                 chi0_srd.at(i_tomo) = xmin + s_srd.at(i_tomo);
-                init_weight.at(i) = gsl_spline_eval_deriv(spline_z_of_chi, chi_cl.at(i), acc_z_of_chi) * super_gaussian(chi_cl.at(i), chi0_srd.at(i_tomo), s_srd.at(i_tomo), i_tomo);
+                init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i) * super_gaussian(chi_cl.at(i), chi0_srd.at(i_tomo), s_srd.at(i_tomo), i_tomo);
             }
         }
         if (boxy && i_tomo < number_counts)
