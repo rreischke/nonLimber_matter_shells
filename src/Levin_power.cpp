@@ -557,7 +557,8 @@ double Levin_power::F_nonlinear(double chi, uint i_tomo, double k)
     double z = z_of_chi(chi);
     if (i_tomo < number_counts)
     {
-        return sqrt(power_nonlinear(z, k)) * kernels(chi, i_tomo) * k;
+        // return sqrt(power_nonlinear(z, k)) * kernels(chi, i_tomo) * k;
+        return sqrt(power_nonlinear(z, k)) * chi * chi * k * norm_srd.at(i_tomo);
     }
     else
     {
