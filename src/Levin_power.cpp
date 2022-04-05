@@ -1,7 +1,7 @@
 #include "Levin_power.h"
 #include <fstream>
 
-const double Levin_power::min_interval = 1.e-5;
+const double Levin_power::min_interval = 1.e-2;
 const double Levin_power::limber_tolerance = 1.0e-2;
 const double Levin_power::tol_abs = 1.0e-30;
 const double Levin_power::tol_rel = 1.0e-7;
@@ -333,15 +333,15 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
                 width = xmax - xmin;
                 s_srd.at(i_tomo) = width / 2.0;
                 chi0_srd.at(i_tomo) = xmin + s_srd.at(i_tomo);
-                init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
-                /*if (chi_cl.at(i) >= xmin && chi_cl.at(i) <= xmax)
+                //init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
+                if (chi_cl.at(i) >= xmin && chi_cl.at(i) <= xmax)
                 {
                     init_weight.at(i) = chi_cl.at(i) * chi_cl.at(i);
                 }
                 else
                 {
                     init_weight.at(i) = 0.0;
-                }*/
+                }
             }
         }
         if (boxy && i_tomo < number_counts)
@@ -409,14 +409,8 @@ void Levin_power::init_splines(std::vector<double> z_bg, std::vector<double> chi
 
 double Levin_power::kernels(double chi, uint i_tomo)
 {
-    if (boxy && i_tomo < number_counts)
-    {
-        return chi * chi * norm_srd.at(i_tomo);
-    }
-    else
-    {
-        return gsl_spline_eval(spline_Weight.at(i_tomo), chi, acc_Weight.at(i_tomo));
-    }
+
+    return gsl_spline_eval(spline_Weight.at(i_tomo), chi, acc_Weight.at(i_tomo));
 }
 
 double Levin_power::super_gaussian(double x, double x0, double s, uint i_tomo)
@@ -563,7 +557,8 @@ double Levin_power::F_nonlinear(double chi, uint i_tomo, double k)
     double z = z_of_chi(chi);
     if (i_tomo < number_counts)
     {
-        return sqrt(power_nonlinear(z, k)) * kernels(chi, i_tomo) * k;
+        // return sqrt(power_nonlinear(z, k)) * kernels(chi, i_tomo) * k;
+        return sqrt(power_nonlinear(z, k)) * chi * chi * k * norm_srd.at(i_tomo);
     }
     else
     {
@@ -819,33 +814,26 @@ void Levin_power::set_auxillary_splines(uint ell)
 
 double Levin_power::Limber(uint ell, uint i_tomo, uint j_tomo)
 {
-    if (i_tomo < number_counts && j_tomo < number_counts && boxy && i_tomo != j_tomo)
+    double fac = 1.0;
+    if (i_tomo >= number_counts)
     {
-        return 0.0;
+        fac /= gsl_pow_2(ell + 0.5);
     }
-    else
+    if (j_tomo >= number_counts)
     {
-        double fac = 1.0;
-        if (i_tomo >= number_counts)
-        {
-            fac /= gsl_pow_2(ell + 0.5);
-        }
-        if (j_tomo >= number_counts)
-        {
-            fac /= gsl_pow_2(ell + 0.5);
-        }
-        if (ell < ell_limber)
-        {
-            return fac * extended_Limber(ell, i_tomo, j_tomo);
-        }
-        uint tid = omp_get_thread_num();
-        integration_variable_Limber_ell[tid] = ell;
-        integration_variable_Limber_i_tomo[tid] = i_tomo;
-        integration_variable_Limber_j_tomo[tid] = j_tomo;
-        double min = chi_min;
-        double max = chi_max;
-        return fac * gslIntegrateqag(Limber_kernel, min, max);
+        fac /= gsl_pow_2(ell + 0.5);
     }
+    if (ell < ell_limber)
+    {
+        return fac * extended_Limber(ell, i_tomo, j_tomo);
+    }
+    uint tid = omp_get_thread_num();
+    integration_variable_Limber_ell[tid] = ell;
+    integration_variable_Limber_i_tomo[tid] = i_tomo;
+    integration_variable_Limber_j_tomo[tid] = j_tomo;
+    double min = chi_min;
+    double max = chi_max;
+    return fac * gslIntegrateqag(Limber_kernel, min, max);
 }
 
 double Levin_power::Limber_kernel(double chi, void *p)
@@ -1148,9 +1136,4 @@ double Levin_power::gslIntegratecquad(double (*fc)(double, void *), double a, do
     gsl_integration_cquad(&gf, a, b, tiny, tol, w, &y, &e, NULL);
     gsl_integration_cquad_workspace_free(w);
     return y;
-}
-
-std::vector<double> Levin_power::get_ells()
-{
-    return aux_ell;
 }
