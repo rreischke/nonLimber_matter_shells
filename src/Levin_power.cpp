@@ -147,10 +147,10 @@ void Levin_power::init_Bessel()
                 double value_min, value_max;
                 value_min = GSL_MAX(0.5 * (l + 0.5) / kernel_maximum.at(i_tomo), k_min);
                 value_max = GSL_MIN(8.0 * (l + 0.5) / kernel_maximum.at(i_tomo), k_max);
-                if (l <= 5)
+                if (l <= 50)
                 {
-                    value_max = k_min;
-                    value_min = k_max;
+                    value_max = 1.0;
+                    value_min = k_min;
                 }
                 if (l >= 86)
                 {
@@ -985,7 +985,7 @@ double Levin_power::C_ell_full(uint i_tomo, uint j_tomo)
     uint tid = omp_get_thread_num();
     integration_variable_i_tomo[tid] = i_tomo;
     integration_variable_j_tomo[tid] = j_tomo;
-    double min = k_min;
+    double min = (GSL_MIN(aux_kmin.at(i_tomo), aux_kmin.at(j_tomo)));
     double max = (GSL_MAX(aux_kmax.at(i_tomo), aux_kmax.at(j_tomo)));
     return 2.0 / M_PI * gslIntegrateqag(k_integration_kernel, log(min), log(max));
 }

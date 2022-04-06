@@ -32,7 +32,7 @@ if __name__ == "__main__":
             if(z_of_chi(chi_kernels[j]) > z_edges[i] and z_of_chi(chi_kernels[j]) < z_edges[i+1]):
                 new_kernel[i, j] = dz_dchi(chi_kernels[j])
 
-    number_count = 2  # new_kernel.shape[0]
+    number_count = 1  # new_kernel.shape[0]
     kernels = new_kernel.T
 
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     maxell = 30000
     N_nonlimber = 40
     N_limber = 100
-    Ninterp = 300
+    Ninterp = 1000
     #print(lp.get_ells())
     lp.set_parameters(ELL_limber, ELL_nonlimber, max_number_subintervals,
                       minell, maxell, N_nonlimber, N_limber, Ninterp)
@@ -63,8 +63,9 @@ if __name__ == "__main__":
     t1 = time.time()
     total = t1-t0
     
+  
     plt.plot(ell, Cl_gg[0])
-    plt.plot(ell, Cl_gg[1])
+    #plt.plot(ell, Cl_gg[1])
     #plt.plot(ell, Cl_gg[nbins])
     #plt.plot(ell, Cl_gg[nbins + nbins - 1])
     #plt.plot(ell, Cl_gg[nbins + nbins + nbins - 2 - 1])
