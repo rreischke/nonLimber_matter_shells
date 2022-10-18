@@ -517,7 +517,7 @@ double Levin_power::A_matrix(uint i, uint j, double chi, double k, uint ell)
     }
     if (i * j == 1)
     {
-        return -(ell + 1.0) / chi;
+        return -ell / chi;
     }
     if (i < j)
     {
