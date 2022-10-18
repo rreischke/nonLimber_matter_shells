@@ -196,7 +196,7 @@ void Levin_power::init_Bessel()
                             uint flat_idx = i_chi * N_interp + i_k;
 
                             A_ell_bessel.at(i_tomo).at(i_ell).at(flat_idx) = gsl_sf_bessel_jl(l, chi_nodes.at(i_chi) * exp(k_bessel.at(i_tomo).at(l).at(i_k)));
-                            A_ellm1_bessel.at(i_tomo).at(i_ell).at(flat_idx) = gsl_sf_bessel_jl(l+1, chi_nodes.at(i_chi) * exp(k_bessel.at(i_tomo).at(l).at(i_k)));
+                            A_ellm1_bessel.at(i_tomo).at(i_ell).at(flat_idx) = gsl_sf_bessel_jl(l - 1, chi_nodes.at(i_chi) * exp(k_bessel.at(i_tomo).at(l).at(i_k)));
                         }
                     }
                 }
@@ -467,7 +467,7 @@ double Levin_power::w(double chi, double k, uint ell, uint i, bool strict)
         case 0:
             return gsl_sf_bessel_jl(ell, chi * k);
         case 1:
-            return gsl_sf_bessel_jl(ell + 1, chi * k);
+            return gsl_sf_bessel_jl(ell - 1, chi * k);
         default:
             return 0.0;
         }
@@ -482,7 +482,7 @@ double Levin_power::w(double chi, double k, uint ell, uint i, bool strict)
             status = gsl_sf_bessel_jl_e(ell, chi * k, &r);
             break;
         case 1:
-            status = gsl_sf_bessel_jl_e(ell + 1, chi * k, &r);
+            status = gsl_sf_bessel_jl_e(ell - 1, chi * k, &r);
             break;
         default:
             return 0.0;
@@ -513,19 +513,19 @@ double Levin_power::A_matrix(uint i, uint j, double chi, double k, uint ell)
 {
     if (i == 0 && j == 0)
     {
-        return ell / chi;
+        return -(ell + 1.0) / chi;
     }
     if (i * j == 1)
     {
-        return -(ell + 2.0)/ chi;
+        return (ell - 1.0) / chi;
     }
     if (i < j)
     {
-        return -k;
+        return k;
     }
     else
     {
-        return k;
+        return -k;
     }
 }
 
